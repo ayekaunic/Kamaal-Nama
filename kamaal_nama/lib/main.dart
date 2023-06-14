@@ -16,6 +16,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.yellow,
       ),
+      darkTheme: ThemeData.dark(),
+      title: 'Kamaal Nama',
     );
   }
 }

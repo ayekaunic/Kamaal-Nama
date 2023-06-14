@@ -10,6 +10,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // text controllor for adding tasks
+  final _taskController = TextEditingController();
+
   // list of tasks to do
   List toDoList = [
     ['task 1', false],
@@ -24,21 +27,51 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // method to create new task
+  void createNewTask() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: TextField(
+            controller: _taskController,
+            decoration: const InputDecoration(
+                border: OutlineInputBorder(), hintText: 'Add a new task'),
+          ),
+          actions: [
+            MaterialButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              color: Colors.red[300],
+              child: const Text('Cancel'),
+            ),
+            MaterialButton(
+              onPressed: () {
+                setState(() {
+                  toDoList.add([_taskController.text, false]);
+                  _taskController.clear();
+                });
+                Navigator.of(context).pop();
+              },
+              color: Colors.green[300],
+              child: const Text('Add Task'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.immersiveSticky,
     );
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Kamaal Nama',
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
-        elevation: 1.8,
+      floatingActionButton: FloatingActionButton(
+        onPressed: createNewTask,
+        child: const Icon(Icons.add),
       ),
       body: ListView.builder(
         itemCount: toDoList.length,
