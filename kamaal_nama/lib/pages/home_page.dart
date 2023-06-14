@@ -63,6 +63,13 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // method to delete task
+  void deleteTask(int index) {
+    setState(() {
+      toDoList.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setEnabledSystemUIMode(
@@ -80,6 +87,7 @@ class _HomePageState extends State<HomePage> {
             taskName: toDoList[index][0],
             taskCompleted: toDoList[index][1],
             onChanged: (value) => checkBoxChanged(value, index),
+            deleteMethod: (context) => deleteTask(index),
           );
         },
       ),
