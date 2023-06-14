@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:kamaal_nama/components/todo_tile.dart';
+import 'package:kamaal_nama/data/database.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,21 +12,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // reference the hive box
+  final _myBox = Hive.box('tasks');
+  ToDoDataBase db = ToDoDataBase();
+
+  @override
+  void initState() {
+    // if first time ever create default data
+    if (_myBox.get('TODOLIST') == null) {
+      db.createInitialData();
+    } else {
+      // not the first time ever
+      db.loadData();
+    }
+
+    super.initState();
+  }
+
   // text controllor for adding tasks
   final _taskController = TextEditingController();
-
-  // list of tasks to do
-  List toDoList = [
-    ['task 1', false],
-    ['task 2', false],
-    ['task 3', false],
-  ];
 
   // method for when checkbox is tapped
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      toDoList[index][1] = !toDoList[index][1];
+      db.toDoList[index][1] = !db.toDoList[index][1];
     });
+    db.updateData();
   }
 
   // method to create new task
@@ -49,10 +62,11 @@ class _HomePageState extends State<HomePage> {
             MaterialButton(
               onPressed: () {
                 setState(() {
-                  toDoList.add([_taskController.text, false]);
+                  db.toDoList.add([_taskController.text, false]);
                   _taskController.clear();
                 });
                 Navigator.of(context).pop();
+                db.updateData();
               },
               color: Colors.green[300],
               child: const Text('Add Task'),
@@ -66,8 +80,9 @@ class _HomePageState extends State<HomePage> {
   // method to delete task
   void deleteTask(int index) {
     setState(() {
-      toDoList.removeAt(index);
+      db.toDoList.removeAt(index);
     });
+    db.updateData();
   }
 
   @override
@@ -76,16 +91,18 @@ class _HomePageState extends State<HomePage> {
       SystemUiMode.immersiveSticky,
     );
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      backgroundColor: Colors.yellow.shade200,
+      floatingActionButton: FloatingActionButton.large(
+        elevation: 6.3,
         onPressed: createNewTask,
         child: const Icon(Icons.add),
       ),
       body: ListView.builder(
-        itemCount: toDoList.length,
+        itemCount: db.toDoList.length,
         itemBuilder: (context, index) {
           return ToDoTile(
-            taskName: toDoList[index][0],
-            taskCompleted: toDoList[index][1],
+            taskName: db.toDoList[index][0],
+            taskCompleted: db.toDoList[index][1],
             onChanged: (value) => checkBoxChanged(value, index),
             deleteMethod: (context) => deleteTask(index),
           );
